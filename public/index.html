@@ -1,0 +1,90 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <head>
+	<title>Osmolation & Changement d'eau</title>
+	<meta name="viewport" content="width=400" />
+	<script src="socket.io/socket.io.js"></script>
+	<style>
+		body { color: black; }
+		img, input[type=image] {
+			width: 5%;
+		}
+	</style>
+
+  </head>
+  <body>
+  	<div id="header">
+    	<div id='infos'>xxx</div>
+    	<div id="osmolation">
+    		<p>OSMOLATION</p>
+    		<div>osmosee2decant<input type="image" class="" id="osmolation_pompe" value="xxx" src="debug.png"></div>
+    		<div>decant_max<input type="image" class="" id="osmolation_capteur" value="xxx" src="debug.png"></div>
+    	</div>
+    	<div id="osmosee_reserve">
+    		<p>OSMOSEE RESERVE</p>
+    		<div>electrovanne<input type="image" class="" id="osmosee_reserve_pompe" value="xxx" src="debug.png"></div>
+    		<div>osmosee_max<input type="image" class="" id="osmosee_reserve_capteur" value="xxx" src="debug.png"></div>
+       	</div>
+    	<div id="eauneuve">
+    		<p>EAU NEUVE</p>
+    		<div>osmosee2eauneuve<input type="image" class="" id="eauneuve_pompe" value="xxx" src="debug.png"></div>
+    		<div>eauneuve_max<input type="image" class="" id="eauneuve_capteur" value="xxx" src="debug.png"></div>
+       	</div>
+       	<div id="changement_eau">
+       		<input type="image" class="" id="changement_eau" value="1" src="doit.png" onclick="changement_eau(this.value)">
+       	</div>
+    	<div id="changement_eau_vider">
+    		<p>CHANGEMENT EAU VIDER</p>
+    		<div>decant2egouts<input type="image" class="" id="changement_eau_vider_pompe" value="xxx" src="debug.png"></div>
+    		<div>decant_min<input type="image" class="" id="changement_eau_vider_capteur" value="xxx" src="debug.png"></div>
+       	</div>
+    	<div id="changement_eau_remplir">
+    		<p>CHANGEMENT EAU REMPLIR</p>
+    		<div>eauneuve2decant<input type="image" class="" id="changement_eau_remplir_pompe" value="xxx" src="debug.png"></div>
+    		<div>decant_max<input type="image" class="" id="changement_eau_remplir_capteur" value="xxx" src="debug.png"></div>
+       	</div>
+    </div>
+	<script type="text/javascript">		
+		var socket = io.connect();
+		var ON = 0;		//relay card inverse ?
+		var OFF = 1;	//relay card inverse ?
+		var DEBUG = 1;	//Debug
+
+		function socketInfos() {
+			socket.on('infos', function (data) {				
+				//document.getElementById( "infos" ).innerHTML = data.infos;
+
+				document.getElementById( "infos" ).innerHTML = data.infos.all;
+
+				//osmolation
+				document.getElementById( "osmolation_pompe" ).src   = "pompe-"   + data.infos.osmolation.pompe   + ".png"; 
+				document.getElementById( "osmolation_capteur" ).src = "capteur-" + data.infos.osmolation.capteur + ".png";
+
+				//osmosee_reserve
+				document.getElementById( "osmosee_reserve_pompe" ).src   = "pompe-"   + data.infos.osmosee_reserve.pompe   + ".png"; 
+				document.getElementById( "osmosee_reserve_capteur" ).src = "capteur-" + data.infos.osmosee_reserve.capteur + ".png";
+
+				//eauneuve
+				document.getElementById( "eauneuve_pompe" ).src   = "pompe-"   + data.infos.eauneuve.pompe   + ".png"; 
+				document.getElementById( "eauneuve_capteur" ).src = "capteur-" + data.infos.eauneuve.capteur + ".png";
+
+				//changement_eau_vider
+				document.getElementById( "changement_eau_vider_pompe" ).src   = "pompe-"   + data.infos.changement_eau_vider.pompe   + ".png"; 
+				document.getElementById( "changement_eau_vider_capteur" ).src = "capteur-" + data.infos.changement_eau_vider.capteur + ".png";
+
+				//changement_eau_remplir
+				document.getElementById( "changement_eau_remplir_pompe" ).src   = "pompe-"   + data.infos.changement_eau_remplir.pompe   + ".png"; 
+				document.getElementById( "changement_eau_remplir_capteur" ).src = "capteur-" + data.infos.changement_eau_remplir.capteur + ".png";
+
+			});
+		}
+
+		function changement_eau(value) {
+			if (DEBUG) { console.log('changement_eau('+value+')'); }
+			socket.emit('changement_eau', { state: value} );
+		}
+
+		socketInfos();
+	</script>
+  </body>
+</html>
