@@ -17,7 +17,7 @@ var HIGH = 1;
 
 var LOG = 1;
 var DEBUG = 0;
-var TEST = 0;
+var TEST = 1;
 var CHECK_PERIOD = 1;
 var SERVER_PORT = 8987;
 
@@ -28,6 +28,13 @@ server = require('http').createServer(app);
 io = require('socket.io').listen(server);
 server.listen(SERVER_PORT);				//start server
 app.use(express.static('public'));		//static page
+
+//date
+var dateFormat = require('dateformat');				//https://github.com/felixge/node-dateformat
+//fs
+
+var f='osmolator.log';
+var fs=require('fs');								//https://gist.github.com/umidjons/8265657
 
 //GPIO init
 var Gpio = require('onoff').Gpio; 				// Constructor function for Gpio objects. (need npm install rpio & npm install onoff)
@@ -133,6 +140,17 @@ decant_max.watch(function (err, value) {
 	if (DEBUG) { console.log("decant_max=", value); }
  	if (err) { throw err; }
 	if (changement_eau == 0) { 
+
+		var now = new Date();
+		var data_obj = { 
+			date: dateFormat(now, "yyyy-mm-dd HH:MM:ss"), 
+			action: 'osmosee2decant',
+			value: value
+		};
+		fs.appendFile(f, JSON.stringify(data_obj), function(err){
+		  if(err) console.error(err);
+		});
+
 		pompe_osmosee2decant.writeSync(value);
 	}
 });
@@ -216,3 +234,24 @@ io.sockets.on('connection', function (socket) {
 	manageWebChangementEau(socket);
 });
 if (LOG) { console.log("Running web on port ",SERVER_PORT); }
+
+
+if (TEST) {
+	var now = new Date();
+	var data_obj = { 
+		date: dateFormat(now, "yyyy-mm-dd HH:MM:ss"), 
+		action: 'osmosee2decant',
+		value: decant_max.readSync()
+	};
+	fs.appendFile(f, JSON.stringify(data_obj), function(err){
+	  if(err) console.error(err);
+	});
+
+	fs.readFile(f, function (err, data) {
+	   if (err) {
+	       return console.error(err);
+	   }
+	   console.log("Data: " + JSON.parse(data)) ;
+	});
+
+}
